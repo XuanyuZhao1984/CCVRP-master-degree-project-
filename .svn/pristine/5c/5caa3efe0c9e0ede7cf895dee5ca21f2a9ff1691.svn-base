@@ -1,0 +1,116 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApplication1.IO
+{
+    
+
+        using Customer = objects.Customer;
+        using Item = objects.Item;
+        using VehicleType = objects.VehicleType;
+
+        public class InstanceRead
+        {
+            private string fileName_prefix;
+            private bool GUIMode;
+            private File file;
+
+            public InstanceRead(string fileName_prefix)
+            {
+                this.fileName_prefix = fileName_prefix;
+                GUIMode = false;
+            }
+
+            public InstanceRead(File file)
+            {
+                this.file = file;
+                GUIMode = true;
+            }
+
+            //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
+            //ORIGINAL LINE: public java.util.ArrayList<objects.Customer> readCustomers(java.util.ArrayList<objects.VehicleType> vehicleTypes) throws java.io.FileNotFoundException
+            public virtual List<Customer> readCustomers(List<VehicleType> vehicleTypes)
+            {
+                List<Customer> customers = new List<Customer>();
+                // we put "inputs" folder under the root directory of the 2L-HFVRP
+                // project.
+                Scanner customerScanner;
+                if (GUIMode)
+                {
+                    customerScanner = new Scanner(file);
+                }
+                else
+                {
+                    string customerFileName = "inputs/" + fileName_prefix + "_input_node.txt";
+
+                    customerScanner = new Scanner(new File(customerFileName));
+                }
+                customerScanner.nextLine();
+                int index = 0;
+                while (customerScanner.hasNextLine())
+                {
+                    string line = customerScanner.nextLine();
+                    Scanner lineScanner = new Scanner(line);
+                    double x = Convert.ToDouble(lineScanner.next());
+                    double y = Convert.ToDouble(lineScanner.next());
+                    double totalWeight = Convert.ToDouble(lineScanner.next());
+                    int numOfItems = Convert.ToInt32(lineScanner.next());
+                    List<Item> items = new List<Item>();
+                    if (numOfItems > 0)
+                    {
+                        for (int i = 0; i < numOfItems; i++)
+                        {
+                            items.Add(new Item(Convert.ToInt32(lineScanner.next()), Convert.ToInt32(lineScanner.next()), i, index));
+                        }
+                    }
+                    Customer customer = new Customer(index, totalWeight, x, y, items, vehicleTypes);
+                    customers.Add(customer);
+                    index++;
+                    lineScanner.close();
+                }
+                customerScanner.close();
+                return customers;
+            }
+
+            //JAVA TO C# CONVERTER WARNING: Method 'throws' clauses are not available in .NET:
+            //ORIGINAL LINE: public java.util.ArrayList<objects.VehicleType> readVehicles() throws java.io.FileNotFoundException
+            public virtual List<VehicleType> readVehicles()
+            {
+                List<VehicleType> vehicleTypes = new List<VehicleType>();
+                string vehicleTypeFileName;
+                if (GUIMode)
+                {
+                    string[] temp = file.Path.Split("node");
+                    vehicleTypeFileName = temp[0] + "vehicle.txt";
+                }
+                else
+                {
+                    vehicleTypeFileName = "inputs/" + fileName_prefix + "_input_vehicle.txt";
+                }
+                Scanner vehicleScanner = new Scanner(new File(vehicleTypeFileName));
+                vehicleScanner.nextLine();
+                while (vehicleScanner.hasNextLine())
+                {
+                    string line = vehicleScanner.nextLine();
+                    Scanner lineScanner = new Scanner(line);
+                    lineScanner.next(); // in our project the quantity of trucks of each
+                                        // type is unlimited, we omit the quantity info
+                                        // in the file
+                    int capacity = Convert.ToInt32(lineScanner.next().replace(".0", ""));
+                    int width = Convert.ToInt32(lineScanner.next());
+                    int length = Convert.ToInt32(lineScanner.next());
+                    double fixedCost = Convert.ToDouble(lineScanner.next());
+                    double variableCost = Convert.ToDouble(lineScanner.next());
+                    VehicleType vehicleType = new VehicleType(capacity, length, width, fixedCost, variableCost);
+                    vehicleTypes.Add(vehicleType);
+                    lineScanner.close();
+                }
+                vehicleScanner.close();
+                return vehicleTypes;
+            }
+
+        }
+    }
